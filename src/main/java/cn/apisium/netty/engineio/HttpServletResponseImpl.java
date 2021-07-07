@@ -11,12 +11,12 @@ import java.util.Collection;
 import java.util.Locale;
 
 public class HttpServletResponseImpl implements HttpServletResponse {
-    private final HttpResponse originalResponse;
+    private final FullHttpResponse originalResponse;
     private final ServletOutputStream outputStream;
     private final PrintWriter printWriter;
-    public HttpServletResponseImpl(HttpResponse originalResponse, ByteBuf buf) {
+    public HttpServletResponseImpl(FullHttpResponse originalResponse) {
         this.originalResponse = originalResponse;
-        outputStream = new ServletOutputStreamImpl(buf);
+        outputStream = new ServletOutputStreamImpl(originalResponse.content());
         printWriter = new PrintWriter(outputStream);
     }
     @Override

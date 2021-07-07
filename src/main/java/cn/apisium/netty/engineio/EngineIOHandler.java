@@ -1,7 +1,5 @@
 package cn.apisium.netty.engineio;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.socket.engineio.server.EngineIoServer;
@@ -24,21 +22,15 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<HttpRequest> {
             ctx.fireChannelRead(msg);
             return;
         }
-        if (HttpUtil.is100ContinueExpected(msg)) {
-            ctx.channel().writeAndFlush(new DefaultHttpResponse(HTTP_1_1, CONTINUE)).addListener(ChannelFutureListener.CLOSE);
-            return;
-        }
-        DefaultHttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-        ByteBuf buf = Unpooled.buffer(0);
-        HttpServletResponseImpl resp = new HttpServletResponseImpl(response, buf);
+        if (HttpUtil.is100ContinueExpected(msg)) ctx.channel().writeAndFlush(new DefaultHttpResponse(HTTP_1_1, CONTINUE));
+        DefaultFullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, OK);
+        HttpServletResponseImpl resp = new HttpServletResponseImpl(response);
         server.handleRequest(new HttpServletRequestImpl(msg), resp);
         System.out.println(msg.uri());
         boolean keepAlive = HttpUtil.isKeepAlive(msg);
         if (keepAlive) response.headers().set(CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 
-        ctx.channel().write(response);
-        ChannelFuture future = ctx.channel().writeAndFlush(buf);
-        if (!keepAlive) future.addListener(ChannelFutureListener.CLOSE);
+        ctx.channel().writeAndFlush(response);
     }
 }
 

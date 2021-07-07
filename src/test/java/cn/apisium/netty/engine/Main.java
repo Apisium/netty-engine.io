@@ -28,9 +28,6 @@ public class Main extends ChannelInitializer<Channel> {
             new ServerBootstrap()
                     .group(el1, el2)
                     .channel(NioServerSocketChannel.class)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .option(ChannelOption.TCP_NODELAY, true)
                     .childHandler(new Main())
                     .bind(2333).sync().channel()
                     .closeFuture().sync();
@@ -48,6 +45,7 @@ public class Main extends ChannelInitializer<Channel> {
                 .addLast(new HttpObjectAggregator(1024 * 1024))
                 .addLast(new HttpResponseDecoder())
                 .addLast(new ChunkedWriteHandler())
+                .addLast(new HttpContentCompressor())
                 .addLast(engineIOHandler)
                 .addLast(new ChannelInboundHandlerAdapter() {
                     @Override
