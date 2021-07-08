@@ -1,17 +1,15 @@
 package cn.apisium.netty.engineio;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpRequest;
-import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import java.io.IOException;
 
-public class ServletInputStreamImpl extends ServletInputStream implements AutoCloseable {
+public class ServletInputStreamImpl extends ServletInputStream {
 
     public HttpRequest request;
 
@@ -48,12 +46,12 @@ public class ServletInputStreamImpl extends ServletInputStream implements AutoCl
     }
 
     @Override
-    public int read(byte @NotNull [] buf) throws IOException {
+    public int read(byte[] buf) throws IOException {
         return this.in.read(buf);
     }
 
     @Override
-    public int read(byte @NotNull [] buf, int offset, int len) throws IOException {
+    public int read(byte[] buf, int offset, int len) throws IOException {
         return this.in.read(buf, offset, len);
     }
 }

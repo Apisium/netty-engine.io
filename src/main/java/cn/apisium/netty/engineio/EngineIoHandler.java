@@ -7,7 +7,6 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.socket.engineio.server.EngineIoServer;
 import io.socket.engineio.server.EngineIoWebSocket;
 import io.socket.parseqs.ParseQS;
-import org.jetbrains.annotations.NotNull;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
@@ -17,12 +16,12 @@ import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
+public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
     private final EngineIoServer server;
     private WebSocketServerHandshaker hs;
     private EngineIoWebSocketImpl socket;
 
-    public EngineIOHandler(@NotNull EngineIoServer server) {
+    public EngineIoHandler(EngineIoServer server) {
         this.server = server;
     }
 

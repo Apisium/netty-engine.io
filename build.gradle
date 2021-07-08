@@ -15,11 +15,9 @@ repositories {
 dependencies {
     compileOnly 'io.netty:netty-all:4.1.65.Final'
     compileOnly 'io.socket:engine.io-server:5.0.0'
-    compileOnly 'org.jetbrains:annotations:21.0.1'
     implementation 'javax.servlet:javax.servlet-api:4.0.1'
 
     testImplementation 'io.netty:netty-all:4.1.65.Final'
-    testImplementation 'org.jetbrains:annotations:21.0.1'
     testImplementation 'io.socket:engine.io-server:5.0.0'
     testImplementation ('io.socket:socket.io-server:3.0.1') {
         exclude group: 'io.socket', module: 'engine.io-server'

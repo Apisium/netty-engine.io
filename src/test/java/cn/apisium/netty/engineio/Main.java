@@ -1,6 +1,5 @@
-package cn.apisium.netty.engine;
+package cn.apisium.netty.engineio;
 
-import cn.apisium.netty.engineio.EngineIOHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -10,14 +9,13 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketSe
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.socket.engineio.server.EngineIoServer;
-import io.socket.engineio.server.EngineIoServerOptions;
 import io.socket.socketio.server.SocketIoServer;
 import io.socket.socketio.server.SocketIoSocket;
 
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class Main extends ChannelInitializer<Channel> {
-    private final EngineIoServer engineIoServer = new EngineIoServer(EngineIoServerOptions.newFromDefault());
+    private final EngineIoServer engineIoServer = new EngineIoServer();
     private Main() {
         SocketIoServer socketIoServer = new SocketIoServer(engineIoServer);
         socketIoServer.namespace("/").on("connection", args -> {
@@ -58,7 +56,7 @@ public class Main extends ChannelInitializer<Channel> {
                 .addLast(new HttpContentCompressor())
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new IdleStateHandler(20000, 20000, 20000))
-                .addLast(new EngineIOHandler(engineIoServer))
+                .addLast(new EngineIoHandler(engineIoServer))
                 .addLast(new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

@@ -5,7 +5,6 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.concurrent.ScheduledFuture;
-import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
@@ -22,7 +21,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
     private String queryString;
     private AsyncContextImpl asyncContext;
 
-    public HttpServletRequestImpl(@NotNull HttpRequest originalRequest, ChannelHandlerContext ctx) {
+    public HttpServletRequestImpl(HttpRequest originalRequest, ChannelHandlerContext ctx) {
         this.originalRequest = originalRequest;
         this.ctx = ctx;
     }

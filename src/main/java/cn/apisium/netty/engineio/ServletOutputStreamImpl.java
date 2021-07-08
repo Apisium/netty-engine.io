@@ -4,7 +4,6 @@ import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.FullHttpResponse;
-import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
@@ -28,12 +27,12 @@ public class ServletOutputStreamImpl extends ServletOutputStream {
     }
 
     @Override
-    public void write(byte @NotNull [] b) throws IOException {
+    public void write(byte[] b) throws IOException {
         out.write(b);
     }
 
     @Override
-    public void write(byte @NotNull [] b, int offset, int len) throws IOException {
+    public void write(byte[] b, int offset, int len) throws IOException {
         out.write(b, offset, len);
     }
 
