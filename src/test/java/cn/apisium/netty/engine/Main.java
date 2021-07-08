@@ -16,7 +16,6 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class Main extends ChannelInitializer<Channel> {
     private final EngineIoServer engineIoServer = new EngineIoServer(EngineIoServerOptions.newFromDefault()
             .setPingTimeout(20000).setPingInterval(25000));
-    private final EngineIOHandler engineIOHandler = new EngineIOHandler(engineIoServer);
     private Main() {
         SocketIoServer socketIoServer = new SocketIoServer(engineIoServer);
         socketIoServer.namespace("/").on("test", System.out::println);
@@ -46,7 +45,7 @@ public class Main extends ChannelInitializer<Channel> {
                 .addLast(new HttpResponseDecoder())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpContentCompressor())
-                .addLast(engineIOHandler)
+                .addLast(new EngineIOHandler(engineIoServer))
                 .addLast(new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

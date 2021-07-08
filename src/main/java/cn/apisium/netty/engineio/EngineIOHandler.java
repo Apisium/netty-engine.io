@@ -22,9 +22,11 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
     private final EngineIoServer server;
     private WebSocketServerHandshaker hs;
     private EngineIoWebSocketImpl socket;
+
     public EngineIOHandler(@NotNull EngineIoServer server) {
         this.server = server;
     }
+
     @SuppressWarnings("RedundantCast")
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object obj) throws Exception {
@@ -83,9 +85,9 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (socket != null) socket.emit("error", "unknown error", cause.getMessage());
-        super.exceptionCaught(ctx, cause);
+        if (ctx.channel().isActive()) ctx.close();
     }
 
     private final static class EngineIoWebSocketImpl extends EngineIoWebSocket {
@@ -101,19 +103,13 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
         }
 
         @Override
-        public Map<String, String> getQuery() {
-            return query;
-        }
+        public Map<String, String> getQuery() { return query; }
 
         @Override
-        public Map<String, List<String>> getConnectionHeaders() {
-            return headers;
-        }
+        public Map<String, List<String>> getConnectionHeaders() {return headers; }
 
         @Override
-        public void write(String message) {
-            channel.writeAndFlush(new TextWebSocketFrame(message));
-        }
+        public void write(String message) { channel.writeAndFlush(new TextWebSocketFrame(message)); }
 
         @Override
         public void write(byte[] message) {
@@ -121,9 +117,7 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
         }
 
         @Override
-        public void close() {
-            channel.close();
-        }
+        public void close() { channel.close(); }
     }
 }
 
