@@ -9,7 +9,6 @@ import io.socket.engineio.server.EngineIoWebSocket;
 import io.socket.parseqs.ParseQS;
 import org.jetbrains.annotations.NotNull;
 
-import static io.netty.handler.codec.http.HttpHeaderNames.CONNECTION;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.util.HashMap;
@@ -56,13 +55,11 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
             }
             if (HttpUtil.is100ContinueExpected(msg)) ctx.channel().writeAndFlush(new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.CONTINUE));
             DefaultFullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
-            server.handleRequest(new HttpServletRequestImpl(msg), new HttpServletResponseImpl(response));
-            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-            boolean keepAlive = HttpUtil.isKeepAlive(msg);
-            if (keepAlive) response.headers().set(CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-
-            ChannelFuture cf = ctx.channel().writeAndFlush(response);
-            if (!keepAlive) cf.addListener(ChannelFutureListener.CLOSE);
+            HttpServletRequestImpl request = new HttpServletRequestImpl(msg, ctx);
+            HttpServletResponseImpl resp = new HttpServletResponseImpl(response.retain(), ctx.channel());
+            server.handleRequest(request, resp);
+            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+            if (!request.isAsyncStarted() && !resp.getOutputStream().closed) resp.getOutputStream().close();
         } else if (obj instanceof WebSocketFrame) {
             WebSocketFrame frame = (WebSocketFrame) obj;
             if (frame instanceof CloseWebSocketFrame) {
@@ -105,7 +102,7 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
         public Map<String, String> getQuery() { return query; }
 
         @Override
-        public Map<String, List<String>> getConnectionHeaders() {return headers; }
+        public Map<String, List<String>> getConnectionHeaders() { return headers; }
 
         @Override
         public void write(String message) { channel.writeAndFlush(new TextWebSocketFrame(message)); }

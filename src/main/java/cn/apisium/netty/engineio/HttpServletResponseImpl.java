@@ -1,9 +1,8 @@
 package cn.apisium.netty.engineio;
 
-import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.handler.codec.http.*;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -12,13 +11,14 @@ import java.util.Locale;
 
 public class HttpServletResponseImpl implements HttpServletResponse {
     private final FullHttpResponse originalResponse;
-    private final ServletOutputStream outputStream;
+    private final ServletOutputStreamImpl outputStream;
     private final PrintWriter printWriter;
-    public HttpServletResponseImpl(FullHttpResponse originalResponse) {
+    public HttpServletResponseImpl(FullHttpResponse originalResponse, Channel channel) {
         this.originalResponse = originalResponse;
-        outputStream = new ServletOutputStreamImpl(originalResponse.content());
+        outputStream = new ServletOutputStreamImpl(originalResponse, channel);
         printWriter = new PrintWriter(outputStream);
     }
+
     @Override
     public void addCookie(Cookie cookie) {
         throw new IllegalStateException("This method needn't to be implemented!");
@@ -135,7 +135,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
     }
 
     @Override
-    public ServletOutputStream getOutputStream() {
+    public ServletOutputStreamImpl getOutputStream() {
         return outputStream;
     }
 
@@ -176,7 +176,7 @@ public class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void flushBuffer() {
-        printWriter.flush();
+        throw new IllegalStateException("This method needn't to be implemented!");
     }
 
     @Override

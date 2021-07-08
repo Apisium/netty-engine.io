@@ -1,8 +1,10 @@
 package cn.apisium.netty.engineio;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.util.concurrent.ScheduledFuture;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.*;
@@ -10,14 +12,19 @@ import javax.servlet.http.*;
 import java.io.BufferedReader;
 import java.security.Principal;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class HttpServletRequestImpl implements HttpServletRequest {
     private final HttpRequest originalRequest;
+    private final ChannelHandlerContext ctx;
     private HashMap<String, Object> attributes;
     private ServletInputStream inputStream;
     private String queryString;
-    public HttpServletRequestImpl(@NotNull HttpRequest originalRequest) {
+    private AsyncContextImpl asyncContext;
+
+    public HttpServletRequestImpl(@NotNull HttpRequest originalRequest, ChannelHandlerContext ctx) {
         this.originalRequest = originalRequest;
+        this.ctx = ctx;
     }
 
     @Override
@@ -338,7 +345,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public AsyncContext startAsync() throws IllegalStateException {
-        throw new IllegalStateException("This method needn't to be implemented!");
+        return asyncContext == null ? (asyncContext = new AsyncContextImpl()) : asyncContext;
     }
 
     @Override
@@ -347,22 +354,81 @@ public class HttpServletRequestImpl implements HttpServletRequest {
     }
 
     @Override
-    public boolean isAsyncStarted() {
-        return false;
-    }
+    public boolean isAsyncStarted() { return asyncContext != null; }
 
     @Override
-    public boolean isAsyncSupported() {
-        return false;
-    }
+    public boolean isAsyncSupported() { return true; }
 
     @Override
-    public AsyncContext getAsyncContext() {
-        throw new IllegalStateException("This method needn't to be implemented!");
-    }
+    public AsyncContext getAsyncContext() { return asyncContext; }
 
     @Override
     public DispatcherType getDispatcherType() {
         throw new IllegalStateException("This method needn't to be implemented!");
+    }
+
+    private final class AsyncContextImpl implements AsyncContext, Runnable {
+        private ScheduledFuture<?> timeoutFuture;
+        private AsyncListener listener;
+
+        @Override
+        public ServletRequest getRequest() { throw new IllegalStateException("This method needn't to be implemented!");  }
+
+        @Override
+        public ServletResponse getResponse() { throw new IllegalStateException("This method needn't to be implemented!"); }
+
+        @Override
+        public boolean hasOriginalRequestAndResponse() { throw new IllegalStateException("This method needn't to be implemented!"); }
+
+        @Override
+        public void dispatch() { throw new IllegalStateException("This method needn't to be implemented!"); }
+
+        @Override
+        public void dispatch(String path) { throw new IllegalStateException("This method needn't to be implemented!"); }
+
+        @Override
+        public void dispatch(ServletContext context, String path) { throw new IllegalStateException("This method needn't to be implemented!"); }
+
+        @Override
+        public void complete() {
+            if (timeoutFuture != null) {
+                timeoutFuture.cancel(false);
+                timeoutFuture = null;
+            }
+            if (listener != null) listener = null;
+        }
+
+        @Override
+        public void start(Runnable run) { throw new IllegalStateException("This method needn't to be implemented!"); }
+
+        @Override
+        public void addListener(AsyncListener listener) { this.listener = listener; }
+
+        @Override
+        public void addListener(AsyncListener listener, ServletRequest servletRequest, ServletResponse servletResponse) {
+            throw new IllegalStateException("This method needn't to be implemented!");
+        }
+
+        @Override
+        public <T extends AsyncListener> T createListener(Class<T> clazz) {
+            throw new IllegalStateException("This method needn't to be implemented!");
+        }
+
+        @Override
+        public void setTimeout(long timeout) {
+            timeoutFuture = ctx.executor().schedule(this, timeout, TimeUnit.MILLISECONDS);
+        }
+
+        @Override
+        public long getTimeout() { throw new IllegalStateException("This method needn't to be implemented!"); }
+
+        @Override
+        public void run() {
+            timeoutFuture = null;
+            if (listener != null) {
+                try { listener.onTimeout(null); } catch (Exception ignored) { }
+                listener = null;
+            }
+        }
     }
 }

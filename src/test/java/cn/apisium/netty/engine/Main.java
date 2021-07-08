@@ -6,20 +6,29 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.socket.engineio.server.EngineIoServer;
 import io.socket.engineio.server.EngineIoServerOptions;
 import io.socket.socketio.server.SocketIoServer;
+import io.socket.socketio.server.SocketIoSocket;
 
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class Main extends ChannelInitializer<Channel> {
-    private final EngineIoServer engineIoServer = new EngineIoServer(EngineIoServerOptions.newFromDefault()
-            .setPingTimeout(20000).setPingInterval(25000));
+    private final EngineIoServer engineIoServer = new EngineIoServer(EngineIoServerOptions.newFromDefault());
     private Main() {
         SocketIoServer socketIoServer = new SocketIoServer(engineIoServer);
-        socketIoServer.namespace("/").on("test", System.out::println);
+        socketIoServer.namespace("/").on("connection", args -> {
+            try {
+                final SocketIoSocket socket = (SocketIoSocket) args[0];
+                socket.send("test2", 666);
+                socket.on("test", it -> System.out.println((int) it[0]));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).on("error", System.out::println);
     }
 
     public static void main(String[] args) {
@@ -47,6 +56,7 @@ public class Main extends ChannelInitializer<Channel> {
                 .addLast(new HttpObjectAggregator(1024 * 1024))
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpContentCompressor())
+                .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new IdleStateHandler(20000, 20000, 20000))
                 .addLast(new EngineIOHandler(engineIoServer))
                 .addLast(new ChannelInboundHandlerAdapter() {
