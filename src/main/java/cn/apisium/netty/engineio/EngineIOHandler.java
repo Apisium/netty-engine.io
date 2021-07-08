@@ -56,9 +56,8 @@ public class EngineIOHandler extends SimpleChannelInboundHandler<Object> {
             }
             if (HttpUtil.is100ContinueExpected(msg)) ctx.channel().writeAndFlush(new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.CONTINUE));
             DefaultFullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
-            HttpServletResponseImpl resp = new HttpServletResponseImpl(response);
-            server.handleRequest(new HttpServletRequestImpl(msg), resp);
-            System.out.println(msg.uri());
+            server.handleRequest(new HttpServletRequestImpl(msg), new HttpServletResponseImpl(response));
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
             boolean keepAlive = HttpUtil.isKeepAlive(msg);
             if (keepAlive) response.headers().set(CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 

@@ -7,6 +7,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.socket.engineio.server.EngineIoServer;
 import io.socket.engineio.server.EngineIoServerOptions;
 import io.socket.socketio.server.SocketIoServer;
@@ -28,6 +29,8 @@ public class Main extends ChannelInitializer<Channel> {
                     .group(el1, el2)
                     .channel(NioServerSocketChannel.class)
                     .childHandler(new Main())
+                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .bind(2333).sync().channel()
                     .closeFuture().sync();
         } catch (Exception e) { e.printStackTrace(); }
@@ -42,9 +45,9 @@ public class Main extends ChannelInitializer<Channel> {
         ch.pipeline()
                 .addLast(new HttpServerCodec())
                 .addLast(new HttpObjectAggregator(1024 * 1024))
-                .addLast(new HttpResponseDecoder())
                 .addLast(new ChunkedWriteHandler())
                 .addLast(new HttpContentCompressor())
+                .addLast(new IdleStateHandler(20000, 20000, 20000))
                 .addLast(new EngineIOHandler(engineIoServer))
                 .addLast(new ChannelInboundHandlerAdapter() {
                     @Override
