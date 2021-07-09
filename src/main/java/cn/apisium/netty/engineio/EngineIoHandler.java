@@ -17,11 +17,17 @@ import java.util.Map;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
+    private final String url;
     private final EngineIoServer server;
     private WebSocketServerHandshaker hs;
     private EngineIoWebSocketImpl socket;
 
     public EngineIoHandler(EngineIoServer server) {
+        this(server, "/socket.io");
+    }
+
+    public EngineIoHandler(EngineIoServer server, String url) {
+        this.url = url;
         this.server = server;
     }
 
@@ -30,7 +36,7 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
     protected void channelRead0(ChannelHandlerContext ctx, Object obj) throws Exception {
         if (obj instanceof FullHttpRequest) {
             FullHttpRequest msg = (FullHttpRequest) obj;
-            if (!msg.uri().startsWith("/socket.io")) {
+            if (url != null && !msg.uri().startsWith(url)) {
                 ctx.fireChannelRead(msg);
                 return;
             }
