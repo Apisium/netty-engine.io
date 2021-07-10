@@ -56,7 +56,12 @@ public class Main extends ChannelInitializer<Channel> {
                 .addLast(new HttpContentCompressor())
                 .addLast(new WebSocketServerCompressionHandler())
                 .addLast(new IdleStateHandler(20000, 20000, 20000))
-                .addLast(new EngineIoHandler(engineIoServer))
+                .addLast(new EngineIoHandler(engineIoServer) {
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+                        cause.printStackTrace();
+                    }
+                })
                 .addLast(new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
