@@ -1,3 +1,6 @@
 .gradle
 .idea
 build
+node_modules
+dist
+.parcel-cache

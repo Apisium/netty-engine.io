@@ -37,7 +37,7 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
         if (obj instanceof FullHttpRequest) {
             FullHttpRequest msg = (FullHttpRequest) obj;
             if (url != null && !msg.uri().startsWith(url)) {
-                ctx.fireChannelRead(msg);
+                ctx.fireChannelRead(msg.retain());
                 return;
             }
             if (!msg.decoderResult().isSuccess()) {
@@ -47,7 +47,7 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
             if ("websocket".equals(msg.headers().get("Upgrade"))) {
                  hs = new WebSocketServerHandshakerFactory(
                         ((FullHttpRequest) obj).uri().replaceAll("^http", "") + "ws",
-                        null, false).newHandshaker(msg);
+                        null, true).newHandshaker(msg);
                 if (hs == null) WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
                 else {
                     hs.handshake(ctx.channel(), msg).addListener(it -> {
