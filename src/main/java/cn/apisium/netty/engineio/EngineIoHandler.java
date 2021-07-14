@@ -1,5 +1,6 @@
 package cn.apisium.netty.engineio;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
@@ -89,7 +90,12 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
             }
             if (socket == null) return;
             if (frame instanceof TextWebSocketFrame) socket.emit("message", ((TextWebSocketFrame) frame).text());
-            else if (frame instanceof BinaryWebSocketFrame) socket.emit("message", (Object) frame.content().array());
+            else if (frame instanceof BinaryWebSocketFrame) {
+                ByteBuf buf = frame.content();
+                byte[] arr = new byte[buf.readableBytes()];
+                buf.readBytes(arr);
+                socket.emit("message", (Object) arr);
+            }
         }
     }
 
