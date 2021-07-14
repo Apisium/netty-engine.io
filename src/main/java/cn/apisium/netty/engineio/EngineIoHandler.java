@@ -19,6 +19,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
     private final String url;
     private final EngineIoServer server;
+    private final WebSocketServerHandshakerFactory handshakerFactory;
     private WebSocketServerHandshaker hs;
     private EngineIoWebSocketImpl socket;
 
@@ -27,8 +28,17 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
     }
 
     public EngineIoHandler(EngineIoServer server, String url) {
+        this(server, url, "ws://127.0.0.1/");
+    }
+
+    public EngineIoHandler(EngineIoServer server, String url, String webSocketURL) {
+        this(server, url, webSocketURL, 65536);
+    }
+
+    public EngineIoHandler(EngineIoServer server, String url, String webSocketURL, int maxLength) {
         this.url = url;
         this.server = server;
+        handshakerFactory = new WebSocketServerHandshakerFactory(webSocketURL, null, true, maxLength);
     }
 
     @SuppressWarnings("RedundantCast")
@@ -45,9 +55,7 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
                 return;
             }
             if ("websocket".equals(msg.headers().get("Upgrade"))) {
-                 hs = new WebSocketServerHandshakerFactory(
-                        ((FullHttpRequest) obj).uri().replaceAll("^http", "") + "ws",
-                        null, true).newHandshaker(msg);
+                hs = handshakerFactory.newHandshaker(msg);
                 if (hs == null) WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(ctx.channel());
                 else {
                     hs.handshake(ctx.channel(), msg).addListener(it -> {
