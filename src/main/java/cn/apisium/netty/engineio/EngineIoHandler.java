@@ -92,7 +92,7 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
             if (frame instanceof TextWebSocketFrame) socket.emit("message", ((TextWebSocketFrame) frame).text());
             else if (frame instanceof BinaryWebSocketFrame) {
                 ByteBuf buf = frame.content();
-                byte[] arr = new byte[buf.readableBytes()];
+                byte[] arr = new byte[buf.capacity()];
                 buf.readBytes(arr);
                 socket.emit("message", (Object) arr);
             }
