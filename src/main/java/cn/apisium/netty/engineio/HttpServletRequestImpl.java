@@ -3,12 +3,11 @@ package cn.apisium.netty.engineio;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.util.concurrent.ScheduledFuture;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -42,11 +41,7 @@ public class HttpServletRequestImpl implements HttpServletRequest {
     }
 
     public String getQueryString() {
-        try {
-            return queryString == null ? (queryString = new URL(originalRequest.uri()).getQuery()) : queryString;
-        } catch (MalformedURLException e) {
-            return "";
-        }
+        return queryString == null ? (queryString = new QueryStringDecoder(originalRequest.uri()).rawQuery()) : queryString;
     }
 
     public Object getAttribute(String name) {

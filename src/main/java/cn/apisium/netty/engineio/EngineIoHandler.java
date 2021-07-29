@@ -11,9 +11,6 @@ import io.socket.parseqs.ParseQS;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,13 +112,7 @@ public class EngineIoHandler extends SimpleChannelInboundHandler<Object> {
 
         public EngineIoWebSocketImpl(Channel channel, FullHttpRequest request) {
             this.channel = channel;
-            Map<String, String> q;
-            try {
-                q = ParseQS.decode(new URL(request.uri()).getQuery());
-            } catch (MalformedURLException e) {
-                q = Collections.emptyMap();
-            }
-            query = q;
+            query = ParseQS.decode(new QueryStringDecoder(request.uri()).rawQuery());
             HttpHeaders h = request.headers();
             h.names().forEach(it -> headers.put(it, h.getAll(it)));
         }
