@@ -19,10 +19,10 @@ The add dependencies:
 
 ```groovy
 dependencies {
-    implementation 'com.github.Apisium:netty-engine.io:1.0'
-    implementation 'io.netty:netty-all:4.1.65.Final'
-    implementation 'io.socket:engine.io-server:5.0.0'
-    testImplementation ('io.socket:socket.io-server:3.0.1') {
+    implementation 'com.github.Apisium:netty-engine.io:1.1'
+    implementation 'io.netty:netty-all:4.1.85.Final'
+    implementation 'io.socket:engine.io-server:6.2.1'
+    testImplementation ('io.socket:socket.io-server:4.0.1') {
         exclude group: 'io.socket', module: 'engine.io-server' // Avoid old engine.io
     }
 }

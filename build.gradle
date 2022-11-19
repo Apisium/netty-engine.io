@@ -6,20 +6,20 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group 'cn.apisium'
-version '1.0-SNAPSHOT'
+version '1.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compileOnly 'io.netty:netty-all:4.1.65.Final'
-    compileOnly 'io.socket:engine.io-server:5.0.0'
+    compileOnly 'io.netty:netty-all:4.1.85.Final'
+    compileOnly 'io.socket:engine.io-server:6.2.1'
 //    implementation 'javax.servlet:javax.servlet-api:4.0.1'
 
-    testImplementation 'io.netty:netty-all:4.1.65.Final'
-    testImplementation 'io.socket:engine.io-server:5.0.0'
-    testImplementation ('io.socket:socket.io-server:3.0.1') {
+    testImplementation 'io.netty:netty-all:4.1.85.Final'
+    testImplementation 'io.socket:engine.io-server:6.2.1'
+    testImplementation ('io.socket:socket.io-server:4.0.1') {
         exclude group: 'io.socket', module: 'engine.io-server'
     }
 }

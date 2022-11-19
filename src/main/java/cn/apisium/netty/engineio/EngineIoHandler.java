@@ -7,8 +7,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.socket.engineio.server.EngineIoServer;
 import io.socket.engineio.server.EngineIoWebSocket;
-import io.socket.parseqs.ParseQS;
-
+import io.socket.engineio.server.utils.ParseQS;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.util.HashMap;
